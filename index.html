@@ -1,162 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Micro Expressions Test</title>
-<style>
-body { margin:0; font-family:Arial; background:#000; color:#FFD700; display:flex; flex-direction:column; align-items:center; padding:20px; }
-h1 { text-align:center; margin-bottom:20px; }
-.container { max-width:700px; width:100%; display:flex; flex-direction:column; align-items:center; }
-.question { margin:20px 0; padding:15px; border:2px solid #FFD700; border-radius:10px; width:100%; }
-.options button { display:block; width:100%; margin:5px 0; padding:10px; background:#000; color:#FFD700; border:1px solid #FFD700; border-radius:6px; cursor:pointer; font-size:16px; }
-.options button:hover { background:#FFD700; color:#000; }
-#feedback { margin-top:10px; font-weight:bold; }
-#startBtn, #nextBtn { margin-top:20px; padding:10px 20px; font-size:18px; cursor:pointer; background:#FFD700; color:#000; border:none; border-radius:8px;}
-#nextBtn { display:none; }
-#difficulty { margin-bottom:15px; display:flex; justify-content:center; gap:10px; align-items:center; }
-#testSection, #resultSection { display:none; }
-img.expression-img { width:200px; height:200px; object-fit:cover; margin:10px auto; border:2px solid #FFD700; border-radius:10px; }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Micro Expressions — Test</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
-<h1>Micro Expressions</h1>
-<div id="difficulty">
-  <button id="startBtn">Start Test</button>
-  <label>Select Difficulty:</label>
-  <select id="levelSelect">
-    <option value="2000">Easy</option>
-    <option value="1000">Medium</option>
-    <option value="500">Hard</option>
-  </select>
-</div>
-<div id="testSection">
-  <div id="questionContainer" class="question"></div>
-  <div id="feedback"></div>
-  <button id="nextBtn">Next</button>
-</div>
-<div id="resultSection">
-  <h2>Test Complete!</h2>
-  <p id="score"></p>
-  <p id="evaluation"></p>
-  <button onclick="location.reload()">Restart Test</button>
-</div>
-</div>
-<script>
-const theoryQuestions = [
-  { q: "You ask someone a question and they briefly raise one eyebrow. What does this indicate?", options:["Skepticism","Happiness","Fear","Surprise"], answer:0, explanation:"Raising one eyebrow is typically a sign of skepticism or doubt." },
-  { q: "A person suddenly shows tightened lips and staring eyes during conversation. What emotion might this show?", options:["Anger","Happiness","Sadness","Disgust"], answer:0, explanation:"Tightened lips and staring eyes indicate anger." },
-  { q: "Quickly lifting the inner corners of the eyebrows can signal which emotion?", options:["Fear","Surprise","Sadness","Contempt"], answer:2, explanation:"Inner eyebrow lift is associated with sadness." }
-];
-const practiceQuestions = [
-  { img:"https://i.imgur.com/5XjP1h1.jpg", answer:"Anger", explanation:"This facial expression shows clear signs of anger." },
-  { img:"https://i.imgur.com/W5L8FqD.jpg", answer:"Fear", explanation:"This facial expression depicts fear." },
-  { img:"https://i.imgur.com/7DlQ3fZ.jpg", answer:"Happiness", explanation:"This expression represents happiness." },
-  { img:"https://i.imgur.com/3V6kP4s.jpg", answer:"Sadness", explanation:"This expression represents sadness." },
-  { img:"https://i.imgur.com/NJd9e4K.jpg", answer:"Surprise", explanation:"This expression represents surprise." },
-  { img:"https://i.imgur.com/4oFxGk3.jpg", answer:"Disgust", explanation:"This expression represents disgust." },
-  { img:"https://i.imgur.com/Zq3VnXt.jpg", answer:"Contempt", explanation:"This expression represents contempt." }
-];
-let currentSection = 'theory';
-let currentIndex = 0;
-let score = 0;
-let timer = null;
-let practiceTime = 2000;
-const startBtn = document.getElementById('startBtn');
-const testSection = document.getElementById('testSection');
-const questionContainer = document.getElementById('questionContainer');
-const feedback = document.getElementById('feedback');
-const nextBtn = document.getElementById('nextBtn');
-const resultSection = document.getElementById('resultSection');
-const scoreDisplay = document.getElementById('score');
-const evaluation = document.getElementById('evaluation');
-const levelSelect = document.getElementById('levelSelect');
-const difficultyDiv = document.getElementById('difficulty');
-startBtn.onclick = () => {
-  practiceTime = parseInt(levelSelect.value);
-  difficultyDiv.style.display = 'none';
-  testSection.style.display = 'block';
-  showQuestion();
-};
-nextBtn.onclick = () => {
-  feedback.innerHTML = '';
-  currentIndex++;
-  if(currentSection==='theory' && currentIndex >= theoryQuestions.length){
-    currentSection = 'practice';
-    currentIndex = 0;
-  }
-  if(currentSection==='practice' && currentIndex >= practiceQuestions.length){
-    showResult();
-  } else {
-    showQuestion();
-  }
-};
-function showQuestion(){
-  nextBtn.style.display='none';
-  feedback.innerHTML = '';
-  questionContainer.innerHTML = '';
-  if(currentSection==='theory'){
-    const qObj = theoryQuestions[currentIndex];
-    questionContainer.innerHTML = `<p>${qObj.q}</p>`;
-    const optionsDiv = document.createElement('div');
-    optionsDiv.className='options';
-    qObj.options.forEach((opt,i)=>{
-      const btn = document.createElement('button');
-      btn.textContent=opt;
-      btn.onclick=()=>checkAnswer(i);
-      optionsDiv.appendChild(btn);
-    });
-    questionContainer.appendChild(optionsDiv);
-  } else if(currentSection==='practice'){
-    const qObj = practiceQuestions[currentIndex];
-    const img = document.createElement('img');
-    img.src = qObj.img;
-    img.className='expression-img';
-    questionContainer.appendChild(img);
-    const optionsDiv = document.createElement('div');
-    optionsDiv.className='options';
-    ["Anger","Disgust","Fear","Surprise","Sadness","Happiness","Contempt"].forEach(opt=>{
-      const btn = document.createElement('button');
-      btn.textContent=opt;
-      btn.onclick=()=>checkAnswer(opt);
-      optionsDiv.appendChild(btn);
-    });
-    setTimeout(()=>{
-      questionContainer.appendChild(optionsDiv);
-    }, practiceTime);
-  }
-}
-function checkAnswer(selected){
-  nextBtn.style.display='inline-block';
-  if(currentSection==='theory'){
-    const qObj = theoryQuestions[currentIndex];
-    if(selected===qObj.answer){
-      feedback.innerHTML=`✅ Correct! <br>${qObj.explanation}`;
-      score++;
-    } else {
-      feedback.innerHTML=`❌ Wrong! Correct answer: ${qObj.options[qObj.answer]}<br>${qObj.explanation}`;
-    }
-  } else if(currentSection==='practice'){
-    clearTimeout(timer);
-    const qObj = practiceQuestions[currentIndex];
-    if(selected===qObj.answer){
-      feedback.innerHTML=`✅ Correct! <br>${qObj.explanation}`;
-      score++;
-    } else {
-      feedback.innerHTML=`❌ Wrong! Correct answer: ${qObj.answer}<br>${qObj.explanation}`;
-    }
-  }
-}
-function showResult(){
-  testSection.style.display='none';
-  resultSection.style.display='block';
-  scoreDisplay.textContent=`Your Score: ${score} / ${theoryQuestions.length + practiceQuestions.length}`;
-  const percent = (score/(theoryQuestions.length + practiceQuestions.length))*100;
-  if(percent>=80) evaluation.textContent="Excellent 👏";
-  else if(percent>=50) evaluation.textContent="Good 🙂, keep practicing";
-  else evaluation.textContent="Needs more training 🧐";
-}
-</script>
+  <header class="top">
+    <div class="brand">
+      <h1>Micro Expressions</h1>
+      <p class="subtitle">Detect micro facial cues — Theory & Practical</p>
+    </div>
+    <nav class="nav">
+      <button data-section="intro" class="nav-btn active">Intro</button>
+      <button data-section="theory" class="nav-btn">Theory</button>
+      <button data-section="practical" class="nav-btn">Practical</button>
+      <button data-section="training" class="nav-btn">Training & Sources</button>
+    </nav>
+  </header>
+
+  <main class="main">
+    <!-- SECTION: Intro -->
+    <section id="intro" class="section active">
+      <div class="center-box">
+        <h2>Welcome</h2>
+        <p>This test measures your ability to spot micro-expressions (short involuntary facial movements). Choose difficulty, then start the full test (Theory → Practical).</p>
+        <div class="controls">
+          <label for="difficulty">Difficulty:</label>
+          <select id="difficulty">
+            <option value="2000">Easy (2s)</option>
+            <option value="1000">Medium (1s)</option>
+            <option value="500">Hard (0.5s)</option>
+          </select>
+          <button id="startAll" class="gold">Start Full Test</button>
+        </div>
+        <div class="note">
+          <strong>Note:</strong> Practical images are loaded from `images/` folder by filename (see instructions below).
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: Theory -->
+    <section id="theory" class="section">
+      <div class="panel">
+        <h2>Theory — 5 Questions</h2>
+        <div id="theory-progress" class="progress-line"><div class="progress-fill" style="width:0%"></div></div>
+        <div id="theory-container" class="question-box"></div>
+        <div id="theory-feedback" class="feedback"></div>
+        <div class="panel-controls">
+          <button id="theory-next" class="gold hidden">Next</button>
+          <div id="theory-score" class="score">Score: 0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: Practical -->
+    <section id="practical" class="section">
+      <div class="panel">
+        <h2>Practical — 5 Images</h2>
+        <div class="controls-row">
+          <label for="practice-difficulty">Practical display time:</label>
+          <select id="practice-difficulty">
+            <option value="2000">Easy (2s)</option>
+            <option value="1000">Medium (1s)</option>
+            <option value="500">Hard (0.5s)</option>
+          </select>
+          <div class="best">Best: <span id="best-score">0</span></div>
+        </div>
+
+        <div id="practical-progress" class="progress-line"><div class="progress-fill" style="width:0%"></div></div>
+        <div id="practical-container" class="question-box"></div>
+        <div id="practical-feedback" class="feedback"></div>
+
+        <div class="panel-controls">
+          <button id="practical-next" class="gold hidden">Next</button>
+          <div id="practical-score" class="score">Score: 0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: Training & Sources -->
+    <section id="training" class="section">
+      <div class="panel">
+        <h2>Training & Sources</h2>
+        <p>Resources used to build the test and for learning more:</p>
+        <ul class="sources">
+          <li>Paul Ekman — research on micro-expressions and METT training</li>
+          <li>FBI Behavioral Analysis articles on nonverbal cues and interviewing</li>
+          <li>Peer-reviewed surveys on facial micro-expression analysis</li>
+        </ul>
+
+        <h3>Quick Tips</h3>
+        <ol>
+          <li>Micro-expressions last less than a second — watch very brief movements around eyes and mouth.</li>
+          <li>Look for asymmetry, tightening, and rapid changes, not longhold smiles.</li>
+          <li>Use practice and METT-like drills to improve recognition.</li>
+        </ol>
+
+        <div class="share-note">
+          <p>When ready, press <strong>"Start Full Test"</strong> from Intro or use nav to replay sections.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL RESULT modal -->
+    <div id="resultModal" class="modal hidden">
+      <div class="modal-box">
+        <h3>Test Complete</h3>
+        <p id="final-summary"></p>
+        <p id="final-eval"></p>
+        <button id="restartAll" class="gold">Restart All</button>
+        <button id="closeModal">Close</button>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <p>Made for training — based on public research. Images must be added to <code>images/</code> folder.</p>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
